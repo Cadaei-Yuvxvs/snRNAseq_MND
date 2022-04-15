@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Jeryn Chang" />
+
+
+<title>Analysis</title>
+
+<script src="site_libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">snRNAseq_muscle_MND</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="analysis.html">Analysis</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Analysis</h1>
+<h4 class="author">Jeryn Chang</h4>
+<h4 class="date">15 April, 2022</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2022-04-15
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>snRNAseq_muscle_MND/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version 1.7.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20220413code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20220413)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20220413code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20220413)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc10846b"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c10846b </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongc10846b" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version c10846b. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Untracked files:
+    Untracked:  data/demicheli_seurat.h5Seurat
+
+Unstaged changes:
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/analysis.Rmd</code>) and HTML (<code>docs/analysis.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+c10846b
+</td>
+<td>
+Cadaei-Yuvxvs
+</td>
+<td>
+2022-04-15
+</td>
+<td>
+Initial commit of website and analysis
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+library(DoubletFinder)
+library(plotly)
+library(MAST)
+library(kableExtra)
+library(dplyr)
+library(gridExtra)
+library(RColorBrewer)
+library(SingleCellExperiment)
+library(gam)
+library(ensembldb)
+library(AnnotationHub)
+library(org.Hs.eg.db)
+library(clustree)
+library(tidygraph)
+library(patchwork)
+library(ggrepel)
+library(Homo.sapiens)
+library(Organism.dplyr)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(biomaRt)
+library(scales)
+library(report)</code></pre>
+<div id="background-and-aims" class="section level1">
+<h1>Background and Aims</h1>
+<p><strong>Background</strong></p>
+<ul>
+<li>Skeletal muscle plays a key role in MND pathology.<br />
+</li>
+<li>Primary myotubes are commonly used to model muscle pathology in MND.<br />
+</li>
+<li>It is unknown whether multinucleated human primary myotubes recapitulate tissue heterogeneity.<br />
+</li>
+<li>Single-nuclei RNA-sequencing (snRNA-seq) provides a method to identity the transcriptome profile of human derived myotubes to recapitulate tissue heterogeneity<br />
+</li>
+<li>Allows potential identification of genetic profile alterations in MND patients compared to control.</li>
+</ul>
+<p><strong>Aims</strong></p>
+<ul>
+<li>The aim of this RMarkdown is to identify differential gene expression profiles between control and MND lines.</li>
+</ul>
+<hr />
+</div>
+<div id="filtering-and-quality-control" class="section level1">
+<h1>1. Filtering and Quality Control</h1>
+<div id="load-raw-counts" class="section level2">
+<h2>1.1 Load raw counts</h2>
+<p>The first step of the analysis is to load the raw 10X matrices into the R environment. The dimensions of these raw matrices are presented in <strong>Table 1</strong>.</p>
+<pre class="r"><code># Load 10X
+cell.lines &lt;- list.dirs(&quot;C:/Users/s4353395/Documents/snrnaseq_mnd/counts&quot;,
+                        recursive = F)
+
+line.list &lt;- lapply(cell.lines, Read10X)
+
+raw.dim &lt;- lapply(line.list, dim)
+raw.dim &lt;- do.call(cbind, raw.dim)
+line.names &lt;- c(&quot;C10&quot;, &quot;C19&quot;, &quot;M17&quot;, &quot;M20&quot;)
+colnames(raw.dim) &lt;- line.names
+rownames(raw.dim) &lt;- c(&quot;Genes&quot;, &quot;Droplets&quot;)
+
+raw.dim %&gt;%
+  kbl(caption = &quot;Table 1. Raw matrix dimensions for each cell line&quot;) %&gt;%
+  kable_material(c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class=" lightable-material lightable-striped lightable-hover" style="font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+Table 1. Raw matrix dimensions for each cell line
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+C10
+</th>
+<th style="text-align:right;">
+C19
+</th>
+<th style="text-align:right;">
+M17
+</th>
+<th style="text-align:right;">
+M20
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Genes
+</td>
+<td style="text-align:right;">
+32838
+</td>
+<td style="text-align:right;">
+32838
+</td>
+<td style="text-align:right;">
+32838
+</td>
+<td style="text-align:right;">
+32838
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Droplets
+</td>
+<td style="text-align:right;">
+6794880
+</td>
+<td style="text-align:right;">
+6794880
+</td>
+<td style="text-align:right;">
+6794880
+</td>
+<td style="text-align:right;">
+6794880
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="empty-genes-and-droplets" class="section level2">
+<h2>1.2 Empty genes and droplets</h2>
+<p>The next step is to filter low-quality droplets.</p>
+<p>To achieve this, the first thing is to remove all droplets with zero detected RNA:</p>
+<pre class="r"><code># Remove droplets with 0 counts
+empty.drops &lt;- NULL
+
+line.list &lt;- lapply(line.list, function(line.matrix){
+  empty_droplets &lt;- colSums(line.matrix) == 0
+  empty.drops &lt;&lt;- c(empty.drops, length(which(empty_droplets)))
+  line.matrix[,!empty_droplets]
+})
+
+# Number of droplets with 0 counts removed
+# C10: 5971929
+# C19: 5899209
+# M17: 6139647
+# M20: 5969238
+
+# Remove genes with 0 counts
+empty.gene.cnt &lt;- NULL
+
+line.list &lt;- lapply(line.list, function(line.matrix){
+  empty_genes &lt;- rowSums(line.matrix) == 0
+  empty.gene.cnt &lt;&lt;- c(empty.gene.cnt, length(which(empty_genes)))
+  line.matrix[!empty_genes,]
+})
+
+zero_cnts_rm_dim &lt;- lapply(line.list, dim)
+# [[1]]
+# [1]  32838 822951
+# 
+# [[2]]
+# [1]  32838 895671
+# 
+# [[3]]
+# [1]  32838 655233
+# 
+# [[4]]
+# [1]  32838 825642
+
+removed.genes.droplets &lt;- rbind(empty.gene.cnt, empty.drops)
+rownames(removed.genes.droplets) &lt;- c(&quot;Empty genes&quot;, &quot;Empty droplets&quot;)
+colnames(removed.genes.droplets) &lt;- line.names
+
+removed.genes.droplets %&gt;%
+  kbl(caption = &quot;Table 2. Empty genes and droplets to be removed&quot;) %&gt;%
+  kable_material(c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class=" lightable-material lightable-striped lightable-hover" style="font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+Table 2. Empty genes and droplets to be removed
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+C10
+</th>
+<th style="text-align:right;">
+C19
+</th>
+<th style="text-align:right;">
+M17
+</th>
+<th style="text-align:right;">
+M20
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Empty genes
+</td>
+<td style="text-align:right;">
+6504
+</td>
+<td style="text-align:right;">
+6753
+</td>
+<td style="text-align:right;">
+7024
+</td>
+<td style="text-align:right;">
+6692
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Empty droplets
+</td>
+<td style="text-align:right;">
+5971929
+</td>
+<td style="text-align:right;">
+5899209
+</td>
+<td style="text-align:right;">
+6139647
+</td>
+<td style="text-align:right;">
+5969238
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="threshold-filtering" class="section level2 tabset">
+<h2 class="tabset">1.3 Threshold filtering</h2>
+<p>For single-nuclei analysis, it is common practice to filter droplets based on the percentage of genes expressed. Based on the violin plots shown below, I am going to go with a consistent threshold of 5%. This means that droplets with less than 5% of genes expressed will be removed. In addition, I will filter droplets with more than 5% of reads mapped to mitochondrial genes.</p>
+<pre class="r"><code>lines.seu &lt;- mapply(function(line.matrix, line.path) {
+  CreateSeuratObject(counts=line.matrix, 
+                     project=substr(line.path,nchar(line.path)-2, nchar(line.path)))
+  },
+  line.matrix = line.list,
+  line.path = cell.lines)
+
+lines.seu &lt;- lapply(lines.seu, function(seu){
+  seu[[&quot;percent.mt&quot;]] &lt;- PercentageFeatureSet(seu, pattern = &quot;^MT-&quot;)
+  seu[[&quot;percent.features&quot;]] &lt;- seu[[&quot;nFeature_RNA&quot;]] / nrow(seu) * 100
+  return(seu)
+})</code></pre>
+<div id="c10" class="section level3">
+<h3>C10</h3>
+<pre class="r"><code>print(VlnPlot(lines.seu[[1]], features = c(&quot;percent.features&quot;, &quot;percent.mt&quot;), ncol = 2))</code></pre>
+<p><img src="figure/analysis.Rmd/c10_vln-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="c19" class="section level3">
+<h3>C19</h3>
+<pre class="r"><code>print(VlnPlot(lines.seu[[2]], features = c(&quot;percent.features&quot;, &quot;percent.mt&quot;), ncol = 2))</code></pre>
+<p><img src="figure/analysis.Rmd/c19_vln-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m17" class="section level3">
+<h3>M17</h3>
+<pre class="r"><code>print(VlnPlot(lines.seu[[3]], features = c(&quot;percent.features&quot;, &quot;percent.mt&quot;), ncol = 2))</code></pre>
+<p><img src="figure/analysis.Rmd/m17_vln-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m20" class="section level3">
+<h3>M20</h3>
+<pre class="r"><code>print(VlnPlot(lines.seu[[4]], features = c(&quot;percent.features&quot;, &quot;percent.mt&quot;), ncol = 2))</code></pre>
+<p><img src="figure/analysis.Rmd/m20_vln-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="filter-summary" class="section level3">
+<h3>Filter summary</h3>
+<pre class="r"><code># Filter droplets percent.mt &lt; 5 and percent.features &gt; 5
+
+lines.seu.red &lt;- lapply(lines.seu, function(seu){
+  subset(seu, subset = percent.mt &lt; 5 &amp; percent.features &gt; 5) 
+})
+
+threshold.rm.cnts &lt;- sapply(lines.seu, ncol) - sapply(lines.seu.red, ncol)
+reduced.dims &lt;- lapply(lines.seu.red, dim)
+reduced.dims &lt;- do.call(cbind, reduced.dims)
+
+threshold.tbl.summary &lt;- rbind(threshold.rm.cnts, reduced.dims)
+colnames(threshold.tbl.summary) &lt;- line.names
+rownames(threshold.tbl.summary) &lt;- c(&quot;Droplets removed&quot;, &quot;Genes&quot;, &quot;Droplets&quot;)
+
+threshold.tbl.summary %&gt;%
+  kbl(caption = &quot;Table 3. Summary of droplets removed from thresholding and thresholded matrix dimensions&quot;) %&gt;%
+  kable_material(c(&quot;striped&quot;, &quot;hover&quot;)) %&gt;%
+  pack_rows(&quot;Thresholded matrix dimensions&quot;, 2,3)</code></pre>
+<table class=" lightable-material lightable-striped lightable-hover" style="font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+Table 3. Summary of droplets removed from thresholding and thresholded matrix dimensions
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+C10
+</th>
+<th style="text-align:right;">
+C19
+</th>
+<th style="text-align:right;">
+M17
+</th>
+<th style="text-align:right;">
+M20
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Droplets removed
+</td>
+<td style="text-align:right;">
+818852
+</td>
+<td style="text-align:right;">
+889704
+</td>
+<td style="text-align:right;">
+653391
+</td>
+<td style="text-align:right;">
+822146
+</td>
+</tr>
+<tr grouplength="2">
+<td colspan="5" style="border-bottom: 1px solid;">
+<strong>Thresholded matrix dimensions</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Genes
+</td>
+<td style="text-align:right;">
+26334
+</td>
+<td style="text-align:right;">
+26085
+</td>
+<td style="text-align:right;">
+25814
+</td>
+<td style="text-align:right;">
+26146
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Droplets
+</td>
+<td style="text-align:right;">
+4099
+</td>
+<td style="text-align:right;">
+5967
+</td>
+<td style="text-align:right;">
+1842
+</td>
+<td style="text-align:right;">
+3496
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="seurat-preprocessing" class="section level2">
+<h2>1.4 Seurat preprocessing</h2>
+<p>Before continuing, I’m going to run some standard pre-processing using <code>Seurat</code>:</p>
+<ul>
+<li>Log-normalisation</li>
+<li>Find the most variable genes</li>
+<li>Scale data</li>
+<li>Dimensional reduction (PCA and UMAP)</li>
+</ul>
+<pre class="r"><code>#Seurat preprocess
+lines.seu.red &lt;- lapply(lines.seu.red, function(seu){
+  seu &lt;- NormalizeData(seu)
+  seu &lt;- FindVariableFeatures(seu)
+  seu &lt;- ScaleData(seu)
+  seu &lt;- RunPCA(seu)
+  seu &lt;- RunUMAP(seu, dims = 1:20, min.dist=0.08, n.neighbors=45, reduction=&quot;pca&quot;,
+                 n.components = 2L)
+  return(seu)
+})</code></pre>
+</div>
+<div id="remove-doublets" class="section level2 tabset">
+<h2 class="tabset">1.5 Remove doublets</h2>
+<p>Doublets are droplets that contain the RNA contents of two nuclei. I’m using the <code>DoubletFinder</code> package to identify these doublets. Identified doublets and singlets are labelled in the UMAPs below.</p>
+<pre class="r"><code># Find doublets
+lines.seu.red &lt;- lapply(lines.seu.red, function(seu){
+  nExp &lt;- round(0.15*nrow(seu@meta.data))
+  seu &lt;- doubletFinder_v3(seu, PCs = 1:10, pN = 0.25, pK = 0.01, nExp = nExp, reuse.pANN = FALSE, sct=FALSE)
+  return(seu)
+  })
+
+doublets.rm &lt;- NULL
+
+plot_doublets &lt;- function(seu){
+  doublet.name &lt;- colnames(seu@meta.data)[grep(&quot;DF*&quot;, colnames(seu@meta.data))]
+  print(DimPlot(seu, reduction = &quot;umap&quot;, label = F, pt.size = 0.25,
+                group.by = doublet.name) +
+          ggtitle(seu@project.name) +
+        ylab(&quot;UMAP 2&quot;) + xlab(&quot;UMAP 1&quot;) +
+          theme(text = element_text(size = 18),
+                axis.text = element_text(size = 18)))
+  length(which(seu[[doublet.name]]==&quot;Doublet&quot;))
+}</code></pre>
+<div id="c10-1" class="section level3">
+<h3>C10</h3>
+<pre class="r"><code>doublets.rm &lt;- c(doublets.rm, plot_doublets(lines.seu.red[[1]]))</code></pre>
+<p><img src="figure/analysis.Rmd/df_c10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="c19-1" class="section level3">
+<h3>C19</h3>
+<pre class="r"><code>doublets.rm &lt;- c(doublets.rm, plot_doublets(lines.seu.red[[2]]))</code></pre>
+<p><img src="figure/analysis.Rmd/df_c19-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m17-1" class="section level3">
+<h3>M17</h3>
+<pre class="r"><code>doublets.rm &lt;- c(doublets.rm, plot_doublets(lines.seu.red[[3]]))</code></pre>
+<p><img src="figure/analysis.Rmd/df_m17-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m20-1" class="section level3">
+<h3>M20</h3>
+<pre class="r"><code>doublets.rm &lt;- c(doublets.rm, plot_doublets(lines.seu.red[[4]]))</code></pre>
+<p><img src="figure/analysis.Rmd/df_m20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="doublet-filter-summary" class="section level3">
+<h3>Doublet filter summary</h3>
+<pre class="r"><code># Keep singlets
+lines.seu.red &lt;- lapply(lines.seu.red, function(seu){
+  doublet.name &lt;- colnames(seu@meta.data)[grep(&quot;DF*&quot;, colnames(seu@meta.data))]
+  seu[,seu[[doublet.name]] == &quot;Singlet&quot;]
+})</code></pre>
+<p>Overall the number of doublets removed are:</p>
+<ul>
+<li><strong>C10: </strong> 615</li>
+<li><strong>C19: </strong> 895</li>
+<li><strong>M17: </strong> 276</li>
+<li><strong>M20: </strong> 524</li>
+</ul>
+</div>
+</div>
+<div id="quality-assurance" class="section level2 tabset">
+<h2 class="tabset">1.6 Quality Assurance</h2>
+<p>I’m plotting scatterplots for each cell line to check if the remaining nuclei are what we expect.</p>
+<p>Overall, we see a positive association between total RNA counts and genes expressed; and nuclei with higher percentages of mitochondrial genes end to have lower counts of RNA. This is expected.</p>
+<div id="c10-2" class="section level3">
+<h3>C10</h3>
+<pre class="r"><code>plot_qa &lt;- function(seu){
+  plot1 &lt;- FeatureScatter(seu, feature1 = &quot;nCount_RNA&quot;, feature2 = &quot;percent.mt&quot;)
+  plot2 &lt;- FeatureScatter(seu, feature1 = &quot;nCount_RNA&quot;, feature2 = &quot;nFeature_RNA&quot;)
+  print(plot1 + plot2)
+}
+
+plot_qa(lines.seu.red[[1]])</code></pre>
+<p><img src="figure/analysis.Rmd/QA_c10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="c19-2" class="section level3">
+<h3>C19</h3>
+<pre class="r"><code>plot_qa(lines.seu.red[[2]])</code></pre>
+<p><img src="figure/analysis.Rmd/QA_c19-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m17-2" class="section level3">
+<h3>M17</h3>
+<pre class="r"><code>plot_qa(lines.seu.red[[3]])</code></pre>
+<p><img src="figure/analysis.Rmd/QA_m17-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="m20-2" class="section level3">
+<h3>M20</h3>
+<pre class="r"><code>plot_qa(lines.seu.red[[4]])</code></pre>
+<p><img src="figure/analysis.Rmd/QA_m20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="integration" class="section level1">
+<h1>2. Integration</h1>
+<p>I’m using <code>Seurat</code>’s standard integration pipeline to integrate all four lines together.</p>
+<pre class="r"><code># Integration
+features &lt;- SelectIntegrationFeatures(object.list = lines.seu.red)
+line.anchors &lt;- FindIntegrationAnchors(object.list = lines.seu.red, anchor.features = features)
+lines.combined &lt;- IntegrateData(anchorset = line.anchors)</code></pre>
+</div>
+<div id="visualisation" class="section level1">
+<h1>3. Visualisation</h1>
+<div id="clustering" class="section level2 tabset">
+<h2 class="tabset">Clustering</h2>
+<div id="clustree" class="section level3">
+<h3>Clustree</h3>
+<pre class="r"><code>run.vis.fun &lt;- function(seu) {
+  seu &lt;- ScaleData(seu, verbose = F, features = features)
+  seu &lt;- RunPCA(seu, verbose = F, features = features)
+  seu &lt;-
+    RunUMAP(
+      seu,
+      dims = 1:20,
+      min.dist = 0.08,
+      n.neighbors = 45,
+      reduction = &quot;pca&quot;,
+      n.components = 2L,
+      verbose = F
+    )
+  seu &lt;- FindNeighbors(seu, dims=1:20, verbose=F)
+  seu &lt;- FindClusters(seu, resolution=seq(0.1,0.8,0.1), verbose=F)
+}
+DefaultAssay(lines.combined) &lt;- &quot;integrated&quot;
+
+lines.combined &lt;- run.vis.fun(lines.combined)
+
+optimal_res &lt;- NULL
+
+run_clustree &lt;- function(seu){
+  print(clustree(seu, prefix=&quot;integrated_snn_res.&quot;))
+  
+  clustree.stability &lt;- clustree(seu, return=&quot;graph&quot;) %&gt;%
+    activate(nodes) %&gt;%
+    as.data.frame() %&gt;%
+    group_by(integrated_snn_res.) %&gt;%
+    summarise(average_stability = mean(sc3_stability))
+  
+  optimal_res &lt;&lt;- clustree.stability$integrated_snn_res.[clustree.stability$average_stability==max(clustree.stability$average_stability)][1]
+    
+  return(clustree.stability)
+}
+
+clustree.out &lt;- run_clustree(lines.combined)</code></pre>
+<p><img src="figure/analysis.Rmd/clustree-1.png" width="672" style="display: block; margin: auto auto auto 0;" /></p>
+</div>
+<div id="optimal-resolution" class="section level3">
+<h3>Optimal resolution</h3>
+<p>The optimal resolution is 0.2.</p>
+<pre class="r"><code>colnames(clustree.out) &lt;- c(&quot;Resolution&quot;, &quot;Average_stability&quot;)
+clustree.out %&gt;%
+    kbl(caption = &quot;Clustering stability&quot;) %&gt;% kable_paper(full_width=F) %&gt;%
+    column_spec(2, color = &quot;white&quot;,
+                background = spec_color(clustree.out$Average_stability, end = 0.7))</code></pre>
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Clustering stability
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Resolution
+</th>
+<th style="text-align:right;">
+Average_stability
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+0.1
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(31, 159, 136, 1) !important;">
+0.4289707
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.2
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(67, 191, 113, 1) !important;">
+0.4791785
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.3
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(44, 113, 142, 1) !important;">
+0.3603427
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.4
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(69, 56, 129, 1) !important;">
+0.2834511
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.5
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(52, 97, 141, 1) !important;">
+0.3354303
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.6
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(41, 123, 142, 1) !important;">
+0.3742372
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.7
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(53, 94, 141, 1) !important;">
+0.3316249
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0.8
+</td>
+<td style="text-align:right;color: white !important;background-color: rgba(68, 1, 84, 1) !important;">
+0.2252198
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="umap" class="section level2 tabset">
+<h2 class="tabset">UMAP</h2>
+<p>These plots illustrate the structure of nuclei expression in two dimensional space. The dimensional reduction method is UMAP.</p>
+<div id="integrated-umap" class="section level3">
+<h3>Integrated UMAP</h3>
+<pre class="r"><code>#DimPlot(lines.combined, reduction=&quot;pca&quot;, group.by = &quot;orig.ident&quot;)
+
+(line.umap &lt;- DimPlot(
+  lines.combined,
+  reduction = &quot;umap&quot;,
+  label = F,
+  label.size = 6,
+  pt.size = 0.25,
+  group.by = &quot;orig.ident&quot;
+) +
+  ggtitle(element_blank()) +
+  ylab(&quot;UMAP 2&quot;) + xlab(&quot;UMAP 1&quot;) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 18)))</code></pre>
+<p><img src="figure/analysis.Rmd/umap_lines-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="automatic-annotation" class="section level3">
+<h3>Automatic annotation</h3>
+<pre class="r"><code>lines.combined &lt;-
+  AddMetaData(lines.combined,
+              sapply(lines.combined$orig.ident, function(x) {
+                ifelse(substr(x, 1, 1) == &quot;C&quot;, &quot;Control&quot;, &quot;MND&quot;)
+              }),
+              &quot;case_control&quot;)
+
+demicheli.seu &lt;- LoadH5Seurat(&quot;data/demicheli_seurat.h5Seurat&quot;)
+
+demicheli.anchors &lt;-
+  FindTransferAnchors(
+    reference = demicheli.seu,
+    query = lines.combined,
+    dims = 1:35,
+    reference.reduction = &quot;pca&quot;
+  )
+
+predictions &lt;-
+  TransferData(
+    anchorset = demicheli.anchors,
+    refdata = demicheli.seu$cell_annotation,
+    dims = 1:35
+  )
+
+lines.combined &lt;- AddMetaData(lines.combined, metadata = predictions)
+lines.combined$predicted.id &lt;- factor(sapply(lines.combined$predicted.id, function(x){
+  ifelse(grepl(&quot;muscle&quot;, x), &quot;Mature skeletal muscle&quot;, &quot;Fibroblasts&quot;)}), levels=c(&quot;Mature skeletal muscle&quot;, &quot;Fibroblasts&quot;))
+combined.muscle &lt;- subset(lines.combined, cells=grep(&quot;Mature skeletal muscle&quot;, lines.combined$predicted.id))
+integrated_case_control &lt;- DimPlot(lines.combined, reduction = &quot;umap&quot;, group.by=&quot;case_control&quot;, cols = DiscretePalette(2, palette = &quot;alphabet&quot;), pt.size = 0.01) + 
+    xlab(&quot;UMAP 1&quot;) + ylab(&quot;UMAP 2&quot;) + ggtitle(element_blank()) + 
+  theme(legend.position=&quot;bottom&quot;, legend.direction = &quot;vertical&quot;, 
+        plot.tag=element_text(face=&quot;plain&quot;, size=18)) +
+    labs(tag=&quot;A&quot;)
+integrated_pred_umap &lt;- DimPlot(lines.combined, reduction = &quot;umap&quot;, group.by=&quot;predicted.id&quot;, pt.size = 0.01) + 
+    xlab(&quot;UMAP 1&quot;) + ylab(&quot;UMAP 2&quot;) + ggtitle(element_blank()) + 
+  theme(legend.position=&quot;bottom&quot;, legend.direction = &quot;vertical&quot;, 
+        plot.tag=element_text(face=&quot;plain&quot;, size=18)) +
+    labs(tag=&quot;B&quot;)
+
+(fig9.ab &lt;- integrated_case_control + integrated_pred_umap + plot_layout(guides = &quot;collect&quot;))</code></pre>
+<p><img src="figure/analysis.Rmd/automatic_demicheli-1.png" width="699.216" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="differential-expression" class="section level1">
+<h1>4. Differential Expression</h1>
+<pre class="r"><code># DE
+DefaultAssay(combined.muscle) &lt;- &quot;RNA&quot;
+Idents(combined.muscle) &lt;- &quot;case_control&quot;
+
+case.control.de &lt;-
+  FindMarkers(
+    combined.muscle,
+    ident.1 = &quot;MND&quot;,
+    ident.2 = &quot;Control&quot;,
+    test.use = &quot;MAST&quot;,
+    min.pct = 0.01,
+    logfc.threshold = 0.05,
+    verbose = F
+  )
+
+ah &lt;- AnnotationHub()
+ahDb &lt;- query(ah, pattern = c(&quot;Ensembl 103 EnsDb for Homo sapiens&quot;))
+ahEdb &lt;- ahDb[[1]]
+
+get_description &lt;- function(up.table) {
+  all.genes &lt;- unique(unlist(up.table$gene))
+  genes.split &lt;-
+    split(all.genes, ceiling(seq_along(all.genes) / 50))
+  bm.tbl &lt;- NULL
+  
+  for (i in 1:length(genes.split)) {
+    bm.out &lt;-
+      biomaRt::select(
+        ahEdb,
+        keys = genes.split[[i]],
+        columns = c(&quot;SYMBOL&quot;, &quot;DESCRIPTION&quot;),
+        keytype = &quot;SYMBOL&quot;
+      )
+    bm.tbl &lt;- rbind(bm.tbl, bm.out)
+  }
+  
+  up.table[[&quot;description&quot;]] &lt;-
+    bm.tbl$DESCRIPTION[match(up.table$gene, bm.tbl$SYMBOL)]
+  
+  return(up.table)
+}</code></pre>
+<p>Our analysis reveals that there are <strong>no overt differences</strong> in expression between MND and control muscle nuclei, including the Agrin-MuSK signalling pathway.</p>
+</div>
+<div id="figures" class="section level1">
+<h1>5. Figures</h1>
+<p>Figures shown here are outputs straight from the code below. For our paper, we further modified the formatting and text in PowerPoint for aesthetic purposes.</p>
+<div id="figure-9" class="section level2">
+<h2>Figure 9</h2>
+<pre class="r"><code>agrin.musk.transcripts &lt;- c(&quot;MUSK&quot;, &quot;CHRNA1&quot;, &quot;DES&quot;, &quot;LRP4&quot;, &quot;DOK7&quot;, &quot;CAV3&quot;, &quot;RAPSN&quot;)
+
+Idents(lines.combined) &lt;- &quot;orig.ident&quot;
+
+integrated.dotplot &lt;- DotPlot(
+  lines.combined,
+  assay = &quot;RNA&quot;,
+  dot.min = 0.01,
+  features = agrin.musk.transcripts,
+  split.by = &quot;predicted.id&quot;,
+  cols = c(&quot;blue&quot;, &quot;blue&quot;)
+) +
+coord_flip() +
+xlab(element_blank()) + ylab(&quot;Predicted Cell Type&quot;) +
+labs(tag = &quot;C&quot;) +
+theme(
+  axis.text.x = element_text(
+    angle = 90,
+    hjust = 1,
+    vjust=0.35,
+    colour = c(&quot;#F8766D&quot;, &quot;#00BFC4&quot;)
+  ),
+  axis.text.y = element_text(face = &quot;italic&quot;),
+  plot.title = element_text(face = &quot;plain&quot;, hjust = 0),
+  legend.position = &quot;right&quot;,
+  plot.tag = element_text(face=&quot;plain&quot;, size=18)
+)
+
+integrated_case_control &lt;- integrated_case_control + labs(tag = &quot;A&quot;) + theme(plot.tag = element_text(face=&quot;plain&quot;, size=18))
+integrated_pred_umap &lt;- integrated_pred_umap + labs(tag=&quot;B&quot;) + theme(plot.tag = element_text(face=&quot;plain&quot;, size=18))
+fig9.ab &lt;- integrated_case_control + integrated_pred_umap + plot_layout(guides = &quot;collect&quot;)
+fig9.abc &lt;- fig9.ab / integrated.dotplot
+
+# fig_nine_dml &lt;- rvg::dml(ggobj = fig9.abc)
+# officer::read_pptx() %&gt;%
+#   officer::add_slide() %&gt;%
+#   officer::ph_with(fig_nine_dml, ph_location(width=7.2835, height = 5)) %&gt;%
+#   base::print(
+#     target =
+#       &quot;C:/Users/s4353395/Documents/snrnaseq_mnd/scripts/fig9.pptx&quot;
+#   )
+
+fig9.abc</code></pre>
+<p><img src="figure/analysis.Rmd/PlotDotPlots-1.png" width="699.216" style="display: block; margin: auto;" /> <strong>Figure 9. Transcriptomic analysis of muscle cell culture nuclei derived from human muscle stem cells identifies fibroblastic and muscle cell types with no apparent bias across MND status.</strong><br />
+<strong>(A)</strong> Whole-transcriptome expression profile patterns for individual nuclei derived from control (Con-13, Con-16) and MND donor (MND-16, MND-9) lines. Distinct expression profile patterns have been reduced to two-dimensions in this Uniform Manifold Approximation and Projection (UMAP) plot. Each point shows results for a single nucleus. MND and non-MND nuclei (pink and blue) are co-clustered in the UMAP, indicating similar patterns of whole-transcriptome expression between MND and controls. <strong>(B)</strong> Nuclei annotated for cell-type, identifying two distinct populations: mature skeletal muscle and fibroblasts. <strong>(C)</strong> Transcript dot plot comparing levels of expression for some key components of the n-agrin-MuSK signaling cascade in two MND samples versus two non-MND samples (see supplementary Figure S5 for full data set). All four samples show transcripts consistent with their expression in muscle cells. Expression of n-agrin-MuSK signaling transcripts appeared comparable between MND and control. Further, all samples do have nuclei that express transcripts associated with maturing muscle skeletal muscle.</p>
+</div>
+<div id="supplementary-figure-5" class="section level2">
+<h2>Supplementary Figure 5</h2>
+<pre class="r"><code>dotplot.symbols &lt;- c(
+  &quot;TTN&quot;,
+  &quot;RYR1&quot;,
+  &quot;MYOG&quot;,
+  &quot;HDAC4&quot;,
+  &quot;MEF2A&quot;,
+  &quot;ACTA1&quot;,
+  &quot;TNNT3&quot;,
+  &quot;TNNI1&quot;,
+  &quot;DMD&quot;,
+  &quot;MYH3&quot;,
+  &quot;DES&quot;,
+  &quot;MUSK&quot;,
+  &quot;DOK7&quot;,
+  &quot;CAV3&quot;,
+  &quot;LRP4&quot;,
+  &quot;RAPSN&quot;,
+  &quot;CHRNA1&quot;,
+  &quot;NCAM1&quot;,
+  &quot;RUNX1&quot;,
+  &quot;APOE&quot;,
+  &quot;POSTN&quot;,
+  &quot;FBN1&quot;,
+  &quot;MFAP5&quot;,
+  &quot;FN1&quot;,
+  &quot;COL4A1&quot;,
+  &quot;COL3A1&quot;,
+  &quot;COL1A1&quot;
+)
+
+simpleCap &lt;- function(x) {
+  s &lt;- strsplit(x, &quot; &quot;)[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+        sep=&quot;&quot;, collapse=&quot; &quot;)
+}
+
+dotplot.proteins &lt;- get_description(data.frame(gene = dotplot.symbols))
+dotplot.proteins$protein &lt;- sapply(dotplot.proteins$description, function(x){
+  x &lt;- strsplit(x, &quot; [&quot;, fixed=T)[[1]][[1]]
+  x &lt;- strsplit(x, &quot;,&quot;)[[1]][[1]]
+  simpleCap(x)
+})
+dotplot.proteins$val &lt;- 1
+dotplot.proteins$protein &lt;- factor(dotplot.proteins$protein, levels=dotplot.proteins$protein)
+
+protein.plot &lt;- ggplot(data = dotplot.proteins, aes(x=protein, y=val)) +
+  geom_bar(stat=&quot;identity&quot;, color = &quot;transparent&quot;, fill=&quot;transparent&quot;) + 
+  labs(x=element_blank(), y=element_blank()) +
+  theme_classic() + 
+  theme(
+    plot.background = element_rect(fill = &quot;transparent&quot;, color = &quot;transparent&quot;),
+    axis.text.y = element_text(size = 12, color = c(
+      rep(&quot;#F8766D&quot;, 19),
+      rep(&quot;#00BFC4&quot;, 8)
+    )),
+    axis.text.x = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = &quot;none&quot;
+  ) +
+  coord_flip()
+ 
+suppl.dotplot &lt;- DotPlot(
+  lines.combined,
+  assay = &quot;RNA&quot;,
+  dot.min = 0.01,
+  features = dotplot.symbols,
+  split.by = &quot;predicted.id&quot;,
+  cols = c(&quot;blue&quot;, &quot;blue&quot;)
+) +
+coord_flip() +
+xlab(element_blank()) + ylab(&quot;Predicted Cell Type&quot;) +
+theme(
+  axis.text.x = element_text(
+    angle = 90,
+    hjust = 1,
+    vjust=0.35,
+    colour = c(&quot;#F8766D&quot;, &quot;#00BFC4&quot;)
+  ),
+  axis.text.y = element_text(face = &quot;italic&quot;,
+                             colour = c(
+      rep(&quot;#F8766D&quot;, 19),
+      rep(&quot;#00BFC4&quot;, 8)
+    )),
+  plot.title = element_text(face = &quot;plain&quot;, hjust = 0),
+  legend.position = &quot;right&quot;
+)
+
+suppl.fig &lt;- protein.plot + suppl.dotplot + plot_layout(widths=c(0.1,1))
+# suppl_dml &lt;- rvg::dml(ggobj = suppl.fig)
+# officer::read_pptx() %&gt;%
+#   officer::add_slide() %&gt;%
+#   officer::ph_with(suppl_dml, ph_location(width=11, height = 8)) %&gt;%
+#   base::print(
+#     target =
+#       &quot;C:/Users/s4353395/Documents/snrnaseq_mnd/scripts/S5_1.pptx&quot;
+#   )
+
+suppl.fig</code></pre>
+<p><img src="figure/analysis.Rmd/suppl_dotplot-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><strong>Supplementary Figure S5. Dot-plot of selected marker genes from nuclei isolated from non-MND and MND muscle cultures.</strong><br />
+Each nuclei isolated from Con-13, Con-16, MND-16, and MND-9 cultures have been automatically catalogued into 2 cell types, based on the single-cell transcriptomic atlas of human skeletal muscle by De Micheli et al, which were manually annotated based on their relative expression of key marker genes (41); i) ‘Fibroblasts’ expressing higher levels of COL1A1; ii) ‘Mature skeletal muscle’ cells (i.e. multinucleated myotubes) whose nuclei consistently displayed a collection of muscle specific genes such as DES, TTN, DMD, and MYH3, as well as genes whose proteins drive the clustering of acetylcholine receptors (AChRs), such as MuSK, LRP4, Dok7, Rapsyn and including AChR subunits (e.g. CHRNA1), and finally known muscle genes RUNXI1 and NCAM1 that are expressed in muscle devoid of motor nerve innervation.</p>
+</div>
+</div>
+<div id="session-information" class="section level1">
+<h1>6. Session Information</h1>
+<p>Analyses were conducted using the R Statistical language (version 4.1.0; R Core Team, 2021) on Windows 10 x64 (build 19042), using the packages SingleCellExperiment (version 1.14.1; Amezquita R et al., 2020), MAST (version 1.18.0; Andrew McDavid, Greg Finak and Masanao Yajima, 2021), gridExtra (version 2.3; Baptiste Auguie, 2017), Homo.sapiens (version 1.3.1; Bioconductor Core Team, 2015), TxDb.Hsapiens.UCSC.hg38.knownGene (version 3.13.0; Bioconductor Core Team and Bioconductor Package Maintainer, 2021), workflowr (version 1.7.0; Blischak JD et al., <a href="https://doi.org/10.12688/f1000research.20843.1" class="uri">https://doi.org/10.12688/f1000research.20843.1</a>), plotly (version 4.9.3; Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.), MatrixGenerics (version 1.4.0; Constantin Ahlmann-Eltze, Peter Hickey and Hervé Pagès, 2021), fields (version 12.3; Douglas Nychka et al., 2017), RColorBrewer (version 1.1.2; Erich Neuwirth, 2014), dotCall64 (version 1.0.1; Gerber et al., 2018), S4Vectors (version 0.30.0; Pagès, Lawrence and Aboyoun, 2021), Biostrings (version 2.60.0; Pagès et al., 2021), ggplot2 (version 3.3.3; Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.), scales (version 1.1.1; Hadley Wickham and Dana Seidel, 2020), dbplyr (version 2.1.1; Hadley Wickham, Maximilian Girlich and Edgar Ruiz, 2021), dplyr (version 1.0.6; Hadley Wickham et al., 2021), Seurat (version 4.0.2.9003; Hao and Hao et al. Integrated analysis of multimodal single-cell data. bioRxiv, 2020), kableExtra (version 1.3.4; Hao Zhu, 2021), matrixStats (version 0.58.0; Henrik Bengtsson, 2021), BSgenome (version 1.60.0; Hervé Pagès, 2021), XVector (version 0.32.0; Hervé Pagès and Patrick Aboyoun, 2021), AnnotationDbi (version 1.54.0; Hervé Pagès et al., 2021), ggrepel (version 0.9.1; Kamil Slowikowski, 2021), GenomicFeatures (version 1.44.0; Lawrence M et al., 2013), GenomicRanges (version 1.44.0; Lawrence M et al., 2013), IRanges (version 2.26.0; Lawrence M et al., 2013), BiocFileCache (version 2.0.0; Lori Shepherd and Martin Morgan, 2021), rtracklayer (version 1.52.0; Lawrence, Gentleman, Carey: “rtracklayer: an {R} package for interfacing with genome browsers”. Bioinformatics 25:1841-1842.), report (version 0.3.0; Makowski et al., 2020), biomaRt (version 2.48.0; Mapping identifiers for the integration of genomic datasets with the R/Bioconductor package biomaRt. Steffen Durinck et al., 2009), GO.db (version 3.13.0; Marc Carlson, 2021), org.Hs.eg.db (version 3.13.0; Marc Carlson, 2021), TxDb.Hsapiens.UCSC.hg19.knownGene (version 3.2.2; Marc Carlson and Bioconductor Package Maintainer, 2015), OrganismDbi (version 1.34.0; Marc Carlson et al., 2021), AnnotationFilter (version 1.16.0; Martin Morgan and Johannes Rainer, 2021), AnnotationHub (version 3.0.0; Martin Morgan and Lori Shepherd, 2021), Organism.dplyr (version 1.20.0; Martin Morgan and Yubo Cheng, 2021), SummarizedExperiment (version 1.22.0; Martin Morgan et al., 2021), KernSmooth (version 2.23.20; Matt Wand, 2021), foreach (version 1.5.1; Microsoft and Steve Weston, 2020), Biobase (version 2.52.0; Orchestrating high-throughput genomic analysis with Bioconductor. Huber, V.Carey, Gentleman, …, Morgan Nature Methods, 2015:12, 115.), BiocGenerics (version 0.38.0; Orchestrating high-throughput genomic analysis with Bioconductor. Huber, V.Carey, Gentleman, …, Morgan Nature Methods, 2015:12, 115.), SeuratDisk (version 0.0.0.9019; Paul Hoffman, 2021), DoubletFinder (version 2.0.3; person), SeuratObject (version 4.0.1; Rahul Satija et al., 2021), ensembldb (version 2.16.0; Rainer J et al., 2019), spam (version 2.6.0; Reinhard Furrer, Stephan Sain, 2010), viridisLite (version 0.4.0; Simon Garnier et al., 2021), viridis (version 0.6.1; Simon Garnier et al., 2021), GenomeInfoDb (version 1.28.0; Sonali Arora et al., 2021), BSgenome.Hsapiens.UCSC.hg19 (version 1.4.3; The Bioconductor Dev Team, 2020), patchwork (version 1.1.1; Thomas Lin Pedersen, 2020), tidygraph (version 1.2.0; Thomas Lin Pedersen, 2020), ggraph (version 2.0.5; Thomas Lin Pedersen, 2021), gam (version 1.20; Trevor Hastie, 2020) and clustree (version 0.4.3; Zappia L, Oshlack Clustering trees: a visualization for evaluating clusterings at multiple resolutions. Gigascience. 2018;7. <a href="DOI:gigascience/giy083" class="uri">DOI:gigascience/giy083</a>).</p>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Amezquita R, Lun A, Becht E, Carey V, Carpp L, Geistlinger L, Marini F,Rue-Albrecht K, Risso D, Soneson C, Waldron L, Pages H, Smith M, HuberW, Morgan M, Gottardo R, Hicks S (2020). “Orchestrating single-cellanalysis with Bioconductor.” <em>Nature Methods</em>, <em>17</em>, 137-145. &lt;URL:<a href="https://www.nature.com/articles/s41592-019-0654-x" class="uri">https://www.nature.com/articles/s41592-019-0654-x</a>&gt;.</li>
+<li>Andrew McDavid, Greg Finak and Masanao Yajima (2021). MAST: Model-based Analysis of Single Cell Transcriptomics. R package version 1.18.0. <a href="https://github.com/RGLab/MAST/" class="uri">https://github.com/RGLab/MAST/</a></li>
+<li>Baptiste Auguie (2017). gridExtra: Miscellaneous Functions for “Grid” Graphics. R package version 2.3. <a href="https://CRAN.R-project.org/package=gridExtra" class="uri">https://CRAN.R-project.org/package=gridExtra</a></li>
+<li>Bioconductor Core Team (2015). Homo.sapiens: Annotation package for the Homo.sapiens object. R package version 1.3.1.</li>
+<li>Bioconductor Core Team and Bioconductor Package Maintainer (2021). TxDb.Hsapiens.UCSC.hg38.knownGene: Annotation package for TxDb object(s). R package version 3.13.0.</li>
+<li>Blischak JD, Carbonetto P and Stephens M. Creating and sharing reproducible research code the workflowr way [version 1; peer review: 3 approved]. F1000Research 2019, 8:1749 (<a href="https://doi.org/10.12688/f1000research.20843.1" class="uri">https://doi.org/10.12688/f1000research.20843.1</a>)</li>
+<li>C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.</li>
+<li>Constantin Ahlmann-Eltze, Peter Hickey and Hervé Pagès (2021). MatrixGenerics: S4 Generic Summary Statistic Functions that Operate on Matrix-Like Objects. R package version 1.4.0. <a href="https://bioconductor.org/packages/MatrixGenerics" class="uri">https://bioconductor.org/packages/MatrixGenerics</a></li>
+<li>Douglas Nychka, Reinhard Furrer, John Paige, Stephan Sain (2017).“fields: Tools for spatial data.” doi: 10.5065/D6W957CT (URL:<a href="https://doi.org/10.5065/D6W957CT" class="uri">https://doi.org/10.5065/D6W957CT</a>), R package version 12.3, &lt;URL:<a href="https://github.com/NCAR/Fields" class="uri">https://github.com/NCAR/Fields</a>&gt;.</li>
+<li>Erich Neuwirth (2014). RColorBrewer: ColorBrewer Palettes. R package version 1.1-2. <a href="https://CRAN.R-project.org/package=RColorBrewer" class="uri">https://CRAN.R-project.org/package=RColorBrewer</a></li>
+<li>F. Gerber, K. Moesinger, R. Furrer (2018), dotCall64: An R package providing an efficient interface to compiled C, C++, and Fortran code supporting long vectors, SoftwareX 7, 217-221, <a href="https://doi.org/10.1016/j.softx.2018.06.002" class="uri">https://doi.org/10.1016/j.softx.2018.06.002</a>.</li>
+<li>H. Pagès, M. Lawrence and P. Aboyoun (2021). S4Vectors: Foundation of vector-like and list-like containers in Bioconductor. R package version 0.30.0. <a href="https://bioconductor.org/packages/S4Vectors" class="uri">https://bioconductor.org/packages/S4Vectors</a></li>
+<li>H. Pagès, P. Aboyoun, R. Gentleman and S. DebRoy (2021). Biostrings: Efficient manipulation of biological strings. R package version 2.60.0. <a href="https://bioconductor.org/packages/Biostrings" class="uri">https://bioconductor.org/packages/Biostrings</a></li>
+<li>H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.</li>
+<li>Hadley Wickham and Dana Seidel (2020). scales: Scale Functions for Visualization. R package version 1.1.1. <a href="https://CRAN.R-project.org/package=scales" class="uri">https://CRAN.R-project.org/package=scales</a></li>
+<li>Hadley Wickham, Maximilian Girlich and Edgar Ruiz (2021). dbplyr: A ‘dplyr’ Back End for Databases. R package version 2.1.1. <a href="https://CRAN.R-project.org/package=dbplyr" class="uri">https://CRAN.R-project.org/package=dbplyr</a></li>
+<li>Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2021). dplyr: A Grammar of Data Manipulation. R package version 1.0.6. <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a></li>
+<li>Hao and Hao et al. Integrated analysis of multimodal single-cell data. bioRxiv (2020) [Seurat V4]</li>
+<li>Hao Zhu (2021). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 1.3.4. <a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a></li>
+<li>Henrik Bengtsson (2021). matrixStats: Functions that Apply to Rows and Columns of Matrices (and to Vectors). R package version 0.58.0. <a href="https://CRAN.R-project.org/package=matrixStats" class="uri">https://CRAN.R-project.org/package=matrixStats</a></li>
+<li>Hervé Pagès (2021). BSgenome: Software infrastructure for efficient representation of full genomes and their SNPs. R package version 1.60.0. <a href="https://bioconductor.org/packages/BSgenome" class="uri">https://bioconductor.org/packages/BSgenome</a></li>
+<li>Hervé Pagès and Patrick Aboyoun (2021). XVector: Foundation of external vector representation and manipulation in Bioconductor. R package version 0.32.0. <a href="https://bioconductor.org/packages/XVector" class="uri">https://bioconductor.org/packages/XVector</a></li>
+<li>Hervé Pagès, Marc Carlson, Seth Falcon and Nianhua Li (2021). AnnotationDbi: Manipulation of SQLite-based annotations in Bioconductor. R package version 1.54.0. <a href="https://bioconductor.org/packages/AnnotationDbi" class="uri">https://bioconductor.org/packages/AnnotationDbi</a></li>
+<li>Kamil Slowikowski (2021). ggrepel: Automatically Position Non-Overlapping Text Labels with ‘ggplot2’. R package version 0.9.1. <a href="https://CRAN.R-project.org/package=ggrepel" class="uri">https://CRAN.R-project.org/package=ggrepel</a></li>
+<li>Lawrence M, Huber W, Pag`es H, Aboyoun P, Carlson M, et al. (2013) Software for Computing and Annotating Genomic Ranges. PLoS Comput Biol 9(8): e1003118. <a href="doi:10.1371/journal.pcbi.1003118" class="uri">doi:10.1371/journal.pcbi.1003118</a></li>
+<li>Lawrence M, Huber W, Pag`es H, Aboyoun P, Carlson M, et al. (2013) Software for Computing and Annotating Genomic Ranges. PLoS Comput Biol 9(8): e1003118. <a href="doi:10.1371/journal.pcbi.1003118" class="uri">doi:10.1371/journal.pcbi.1003118</a></li>
+<li>Lawrence M, Huber W, Pag`es H, Aboyoun P, Carlson M, et al. (2013) Software for Computing and Annotating Genomic Ranges. PLoS Comput Biol 9(8): e1003118. <a href="doi:10.1371/journal.pcbi.1003118" class="uri">doi:10.1371/journal.pcbi.1003118</a></li>
+<li>Lori Shepherd and Martin Morgan (2021). BiocFileCache: Manage Files Across Sessions. R package version 2.0.0.</li>
+<li>M. Lawrence, R. Gentleman, V. Carey: “rtracklayer: an {R} package for interfacing with genome browsers”. Bioinformatics 25:1841-1842.</li>
+<li>Makowski, D., Ben-Shachar, M.S., Patil, I. &amp; Lüdecke, D. (2020). Automated Results Reporting as a Practical Tool to Improve Reproducibility and Methodological Best Practices Adoption. CRAN. Available from <a href="https://github.com/easystats/report" class="uri">https://github.com/easystats/report</a>. doi: .</li>
+<li>Mapping identifiers for the integration of genomic datasets with the R/Bioconductor package biomaRt. Steffen Durinck, Paul T. Spellman, Ewan Birney and Wolfgang Huber, Nature Protocols 4, 1184-1191 (2009).</li>
+<li>Marc Carlson (2021). GO.db: A set of annotation maps describing the entire Gene Ontology. R package version 3.13.0.</li>
+<li>Marc Carlson (2021). org.Hs.eg.db: Genome wide annotation for Human. R package version 3.13.0.</li>
+<li>Marc Carlson and Bioconductor Package Maintainer (2015). TxDb.Hsapiens.UCSC.hg19.knownGene: Annotation package for TxDb object(s). R package version 3.2.2.</li>
+<li>Marc Carlson, Hervé Pagès, Martin Morgan and Valerie Obenchain (2021). OrganismDbi: Software to enable the smooth interfacing of different database packages. R package version 1.34.0.</li>
+<li>Martin Morgan and Johannes Rainer (2021). AnnotationFilter: Facilities for Filtering Bioconductor Annotation Resources. R package version 1.16.0. <a href="https://github.com/Bioconductor/AnnotationFilter" class="uri">https://github.com/Bioconductor/AnnotationFilter</a></li>
+<li>Martin Morgan and Lori Shepherd (2021). AnnotationHub: Client to access AnnotationHub resources. R package version 3.0.0.</li>
+<li>Martin Morgan and Yubo Cheng (2021). Organism.dplyr: dplyr-based Access to Bioconductor Annotation Resources. R package version 1.20.0.</li>
+<li>Martin Morgan, Valerie Obenchain, Jim Hester and Hervé Pagès (2021). SummarizedExperiment: SummarizedExperiment container. R package version 1.22.0. <a href="https://bioconductor.org/packages/SummarizedExperiment" class="uri">https://bioconductor.org/packages/SummarizedExperiment</a></li>
+<li>Matt Wand (2021). KernSmooth: Functions for Kernel Smoothing Supporting Wand &amp; Jones (1995). R package version 2.23-20. <a href="https://CRAN.R-project.org/package=KernSmooth" class="uri">https://CRAN.R-project.org/package=KernSmooth</a></li>
+<li>Microsoft and Steve Weston (2020). foreach: Provides Foreach Looping Construct. R package version 1.5.1. <a href="https://CRAN.R-project.org/package=foreach" class="uri">https://CRAN.R-project.org/package=foreach</a></li>
+<li>Orchestrating high-throughput genomic analysis with Bioconductor. W. Huber, V.J. Carey, R. Gentleman, …, M. Morgan Nature Methods, 2015:12, 115.</li>
+<li>Orchestrating high-throughput genomic analysis with Bioconductor. W. Huber, V.J. Carey, R. Gentleman, …, M. Morgan Nature Methods, 2015:12, 115.</li>
+<li>Paul Hoffman (2021). SeuratDisk: Interfaces for HDF5-Based Single Cell File Formats. <a href="https://mojaveazure.github.io/seurat-disk/" class="uri">https://mojaveazure.github.io/seurat-disk/</a>, <a href="https://github.com/mojaveazure/seurat-disk" class="uri">https://github.com/mojaveazure/seurat-disk</a>.</li>
+<li>person) (2021). DoubletFinder: DoubletFinder is a suite of tools for identifying doublets in single-cell RNA sequencing data.. R package version 2.0.3.</li>
+<li>R Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</li>
+<li>Rahul Satija, Andrew Butler, Paul Hoffman and Tim Stuart (2021). SeuratObject: Data Structures for Single Cell Data. R package version 4.0.1. <a href="https://CRAN.R-project.org/package=SeuratObject" class="uri">https://CRAN.R-project.org/package=SeuratObject</a></li>
+<li>Rainer J, Gatto L, Weichenberger CX (2019) ensembldb: an R package to create and use Ensembl-based annotation resources. Bioinformatics. <a href="doi:10.1093/bioinformatics/btz031" class="uri">doi:10.1093/bioinformatics/btz031</a></li>
+<li>Reinhard Furrer, Stephan R. Sain (2010). spam: A Sparse Matrix R Package with Emphasis on MCMC Methods for Gaussian Markov Random Fields. Journal of Statistical Software, 36(10), 1-25. URL <a href="https://www.jstatsoft.org/v36/i10/" class="uri">https://www.jstatsoft.org/v36/i10/</a>.</li>
+<li>Simon Garnier, Noam Ross, Robert Rudis, Antônio P. Camargo, Marco Sciaini, and Cédric Scherer (2021). Rvision - Colorblind-Friendly Color Maps for R. R package version 0.4.0.</li>
+<li>Simon Garnier, Noam Ross, Robert Rudis, Antônio P. Camargo, Marco Sciaini, and Cédric Scherer (2021). Rvision - Colorblind-Friendly Color Maps for R. R package version 0.6.1.</li>
+<li>Sonali Arora, Martin Morgan, Marc Carlson and H. Pagès (2021). GenomeInfoDb: Utilities for manipulating chromosome names, including modifying them to follow a particular naming style. R package version 1.28.0. <a href="https://bioconductor.org/packages/GenomeInfoDb" class="uri">https://bioconductor.org/packages/GenomeInfoDb</a></li>
+<li>The Bioconductor Dev Team (2020). BSgenome.Hsapiens.UCSC.hg19: Full genome sequences for Homo sapiens (UCSC version hg19, based on GRCh37.p13). R package version 1.4.3.</li>
+<li>Thomas Lin Pedersen (2020). patchwork: The Composer of Plots. R package version 1.1.1. <a href="https://CRAN.R-project.org/package=patchwork" class="uri">https://CRAN.R-project.org/package=patchwork</a></li>
+<li>Thomas Lin Pedersen (2020). tidygraph: A Tidy API for Graph Manipulation. R package version 1.2.0. <a href="https://CRAN.R-project.org/package=tidygraph" class="uri">https://CRAN.R-project.org/package=tidygraph</a></li>
+<li>Thomas Lin Pedersen (2021). ggraph: An Implementation of Grammar of Graphics for Graphs and Networks. R package version 2.0.5. <a href="https://CRAN.R-project.org/package=ggraph" class="uri">https://CRAN.R-project.org/package=ggraph</a></li>
+<li>Trevor Hastie (2020). gam: Generalized Additive Models. R package version 1.20. <a href="https://CRAN.R-project.org/package=gam" class="uri">https://CRAN.R-project.org/package=gam</a></li>
+<li>Zappia L, Oshlack A. Clustering trees: a visualization for evaluating clusterings at multiple resolutions. Gigascience. 2018;7. <a href="DOI:gigascience/giy083" class="uri">DOI:gigascience/giy083</a></li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19042)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Australia.1252  LC_CTYPE=English_Australia.1252   
+[3] LC_MONETARY=English_Australia.1252 LC_NUMERIC=C                      
+[5] LC_TIME=English_Australia.1252    
+
+attached base packages:
+ [1] grid      splines   parallel  stats4    stats     graphics  grDevices
+ [8] utils     datasets  methods   base     
+
+other attached packages:
+ [1] KernSmooth_2.23-20                      
+ [2] fields_12.3                             
+ [3] viridis_0.6.1                           
+ [4] viridisLite_0.4.0                       
+ [5] spam_2.6-0                              
+ [6] dotCall64_1.0-1                         
+ [7] report_0.3.0                            
+ [8] scales_1.1.1                            
+ [9] biomaRt_2.48.0                          
+[10] BSgenome.Hsapiens.UCSC.hg19_1.4.3       
+[11] BSgenome_1.60.0                         
+[12] rtracklayer_1.52.0                      
+[13] Biostrings_2.60.0                       
+[14] XVector_0.32.0                          
+[15] TxDb.Hsapiens.UCSC.hg38.knownGene_3.13.0
+[16] Organism.dplyr_1.20.0                   
+[17] Homo.sapiens_1.3.1                      
+[18] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 
+[19] GO.db_3.13.0                            
+[20] OrganismDbi_1.34.0                      
+[21] ggrepel_0.9.1                           
+[22] patchwork_1.1.1                         
+[23] tidygraph_1.2.0                         
+[24] clustree_0.4.3                          
+[25] ggraph_2.0.5                            
+[26] org.Hs.eg.db_3.13.0                     
+[27] AnnotationHub_3.0.0                     
+[28] BiocFileCache_2.0.0                     
+[29] dbplyr_2.1.1                            
+[30] ensembldb_2.16.0                        
+[31] AnnotationFilter_1.16.0                 
+[32] GenomicFeatures_1.44.0                  
+[33] AnnotationDbi_1.54.0                    
+[34] gam_1.20                                
+[35] foreach_1.5.1                           
+[36] RColorBrewer_1.1-2                      
+[37] gridExtra_2.3                           
+[38] dplyr_1.0.6                             
+[39] kableExtra_1.3.4                        
+[40] MAST_1.18.0                             
+[41] SingleCellExperiment_1.14.1             
+[42] SummarizedExperiment_1.22.0             
+[43] Biobase_2.52.0                          
+[44] GenomicRanges_1.44.0                    
+[45] GenomeInfoDb_1.28.0                     
+[46] IRanges_2.26.0                          
+[47] S4Vectors_0.30.0                        
+[48] BiocGenerics_0.38.0                     
+[49] MatrixGenerics_1.4.0                    
+[50] matrixStats_0.58.0                      
+[51] plotly_4.9.3                            
+[52] DoubletFinder_2.0.3                     
+[53] ggplot2_3.3.3                           
+[54] SeuratDisk_0.0.0.9019                   
+[55] SeuratObject_4.0.1                      
+[56] Seurat_4.0.2.9003                       
+[57] workflowr_1.7.0                         
+
+loaded via a namespace (and not attached):
+  [1] estimability_1.3              rappdirs_0.3.3               
+  [3] scattermore_0.7               coda_0.19-4                  
+  [5] tidyr_1.1.3                   bit64_4.0.5                  
+  [7] knitr_1.33                    multcomp_1.4-17              
+  [9] irlba_2.3.3                   DelayedArray_0.18.0          
+ [11] data.table_1.14.0             rpart_4.1-15                 
+ [13] KEGGREST_1.32.0               RCurl_1.98-1.3               
+ [15] generics_0.1.0                TH.data_1.0-10               
+ [17] callr_3.7.0                   cowplot_1.1.1                
+ [19] RSQLite_2.2.7                 RANN_2.6.1                   
+ [21] future_1.21.0                 bit_4.0.4                    
+ [23] spatstat.data_2.1-0           webshot_0.5.2                
+ [25] xml2_1.3.2                    httpuv_1.6.1                 
+ [27] assertthat_0.2.1              xfun_0.23                    
+ [29] hms_1.1.0                     jquerylib_0.1.4              
+ [31] evaluate_0.14                 promises_1.2.0.1             
+ [33] fansi_0.4.2                   restfulr_0.0.13              
+ [35] progress_1.2.2                igraph_1.2.6                 
+ [37] DBI_1.1.1                     htmlwidgets_1.5.3            
+ [39] spatstat.geom_2.1-0           purrr_0.3.4                  
+ [41] ellipsis_0.3.2                RSpectra_0.16-0              
+ [43] backports_1.2.1               insight_0.14.1               
+ [45] deldir_0.2-10                 vctrs_0.3.8                  
+ [47] ROCR_1.0-11                   abind_1.4-5                  
+ [49] cachem_1.0.5                  withr_2.4.2                  
+ [51] ggforce_0.3.3                 checkmate_2.0.0              
+ [53] emmeans_1.6.1                 sctransform_0.3.2            
+ [55] GenomicAlignments_1.28.0      prettyunits_1.1.1            
+ [57] goftest_1.2-2                 svglite_2.0.0                
+ [59] cluster_2.1.2                 lazyeval_0.2.2               
+ [61] crayon_1.4.1                  hdf5r_1.3.5                  
+ [63] labeling_0.4.2                pkgconfig_2.0.3              
+ [65] tweenr_1.0.2                  nlme_3.1-152                 
+ [67] ProtGenerics_1.24.0           rlang_0.4.11                 
+ [69] globals_0.14.0                lifecycle_1.0.0              
+ [71] miniUI_0.1.1.1                sandwich_3.0-1               
+ [73] filelock_1.0.2                rprojroot_2.0.2              
+ [75] polyclip_1.10-0               lmtest_0.9-38                
+ [77] graph_1.70.0                  Matrix_1.3-3                 
+ [79] zoo_1.8-9                     whisker_0.4                  
+ [81] ggridges_0.5.3                processx_3.5.2               
+ [83] png_0.1-7                     rjson_0.2.20                 
+ [85] parameters_0.14.0             bitops_1.0-7                 
+ [87] getPass_0.2-2                 blob_1.2.1                   
+ [89] stringr_1.4.0                 parallelly_1.25.0            
+ [91] memoise_2.0.0                 magrittr_2.0.1               
+ [93] plyr_1.8.6                    ica_1.0-2                    
+ [95] zlibbioc_1.38.0               compiler_4.1.0               
+ [97] BiocIO_1.2.0                  fitdistrplus_1.1-5           
+ [99] Rsamtools_2.8.0               cli_3.0.0                    
+[101] listenv_0.8.0                 pbapply_1.4-3                
+[103] ps_1.6.0                      MASS_7.3-54                  
+[105] mgcv_1.8-35                   tidyselect_1.1.1             
+[107] stringi_1.6.1                 highr_0.9                    
+[109] yaml_2.2.1                    sass_0.4.0                   
+[111] tools_4.1.0                   future.apply_1.7.0           
+[113] rstudioapi_0.13               git2r_0.30.1                 
+[115] farver_2.1.0                  Rtsne_0.15                   
+[117] digest_0.6.27                 BiocManager_1.30.15          
+[119] shiny_1.6.0                   Rcpp_1.0.7                   
+[121] BiocVersion_3.13.1            later_1.2.0                  
+[123] RcppAnnoy_0.0.18              httr_1.4.2                   
+[125] effectsize_0.4.5              colorspace_2.0-1             
+[127] rvest_1.0.1                   XML_3.99-0.6                 
+[129] fs_1.5.0                      tensor_1.5                   
+[131] reticulate_1.20               uwot_0.1.10                  
+[133] RBGL_1.68.0                   spatstat.utils_2.1-0         
+[135] graphlayouts_0.7.1            systemfonts_1.0.2            
+[137] xtable_1.8-4                  jsonlite_1.7.2               
+[139] R6_2.5.0                      pillar_1.6.2                 
+[141] htmltools_0.5.1.1             mime_0.10                    
+[143] glue_1.4.2                    fastmap_1.1.0                
+[145] BiocParallel_1.26.0           interactiveDisplayBase_1.30.0
+[147] codetools_0.2-18              maps_3.3.0                   
+[149] mvtnorm_1.1-1                 utf8_1.2.1                   
+[151] lattice_0.20-44               bslib_0.2.5.1                
+[153] spatstat.sparse_2.0-0         tibble_3.1.2                 
+[155] curl_4.3.1                    leiden_0.3.8                 
+[157] survival_3.2-11               rmarkdown_2.8                
+[159] munsell_0.5.0                 GenomeInfoDbData_1.2.6       
+[161] iterators_1.0.13              reshape2_1.4.4               
+[163] gtable_0.3.0                  bayestestR_0.10.0            
+[165] spatstat.core_2.1-2          </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
