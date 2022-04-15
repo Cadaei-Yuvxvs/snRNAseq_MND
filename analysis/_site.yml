@@ -1,14 +1,20 @@
-name: "snRNAseq_muscle_MND"
+name: snRNAseq_muscle_MND
 output_dir: ../docs
 navbar:
-  title: "snRNAseq_muscle_MND"
+  title: snRNAseq_muscle_MND
   left:
   - text: Home
     href: index.html
+  - text: Analysis
+    href: analysis.html
   - text: About
     href: about.html
   - text: License
     href: license.html
+  right:
+  - icon: fab fa-github
+    text: Source code
+    href: https://github.com/Cadaei-Yuvxvs/snRNAseq_muscle_MND
 output:
   workflowr::wflow_html:
     toc: yes
