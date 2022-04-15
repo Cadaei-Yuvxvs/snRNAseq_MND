@@ -7,4 +7,8 @@ editor_options:
   chunk_output_type: console
 ---
 
-Describe your project.
+We characterised the gene expression profiles of muscle cultures derived from two donors with MND and two non-neurodegenerative donors.
+
+See the methods section of [our paper](https://actaneurocomms.biomedcentral.com/articles?query=Impaired+signaling+for+neuromuscular+synaptic+maintenance+is+a+feature+of+Motor+Neuron+Disease&volume=&searchType=&tab=keyword) for details on the isolation of single-nuclei from myotubes for RNA sequencing.
+
+This work is made possible by Shyuan Ngo ([\@NgoShyuan](https://twitter.com/NgoShyuan "Shyuan Ngo's Twitter")), Dominique Power ([\@Dom_T\_Power](https://twitter.com/Dom_T_Power "Dominique Power's Twitter")), Jeryn Chang ([\@JerynChang](https://twitter.com/JerynChang "Jeryn Chang's Twitter")), Jessica Mar ([\@jessicacmar](https://twitter.com/jessicacmar "Jessica Mar's Twitter")), and Atefeh Taherian Fard ([\@AtiFard](https://twitter.com/AtiFard "Atehfeh Taherian Fard's Twitter")).

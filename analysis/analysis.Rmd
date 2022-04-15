@@ -1,0 +1,774 @@
+---
+title: "Analysis"
+author: "Jeryn Chang"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    code_folding: "hide"
+    toc: true
+    toc_float: true
+    theme: paper
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = NA)
+windowsFonts(A = windowsFont("arial"))
+```
+
+```{r load_file, warning=FALSE, message=FALSE}
+library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+library(DoubletFinder)
+library(plotly)
+library(MAST)
+library(kableExtra)
+library(dplyr)
+library(gridExtra)
+library(RColorBrewer)
+library(SingleCellExperiment)
+library(gam)
+library(ensembldb)
+library(AnnotationHub)
+library(org.Hs.eg.db)
+library(clustree)
+library(tidygraph)
+library(patchwork)
+library(ggrepel)
+library(Homo.sapiens)
+library(Organism.dplyr)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(biomaRt)
+library(scales)
+library(report)
+```
+
+
+# Background and Aims
+
+**Background**  
+
+* Skeletal muscle plays a key role in MND pathology.  
+* Primary myotubes are commonly used to model muscle pathology in MND.  
+* It is unknown whether multinucleated human primary myotubes recapitulate tissue heterogeneity.  
+* Single-nuclei RNA-sequencing (snRNA-seq) provides a method to identity the transcriptome profile of human derived myotubes to recapitulate tissue heterogeneity  
+* Allows potential identification of genetic profile alterations in MND patients compared to control.  
+
+**Aims**  
+
+* The aim of this RMarkdown is to identify differential gene expression profiles between control and MND lines.
+
+***
+
+# 1. Filtering and Quality Control
+
+## 1.1 Load raw counts
+
+The first step of the analysis is to load the raw 10X matrices into the R environment. The dimensions of these raw matrices are presented in **Table 1**.
+
+```{r load_raw_counts}
+# Load 10X
+cell.lines <- list.dirs("C:/Users/s4353395/Documents/snrnaseq_mnd/counts",
+                        recursive = F)
+
+line.list <- lapply(cell.lines, Read10X)
+
+raw.dim <- lapply(line.list, dim)
+raw.dim <- do.call(cbind, raw.dim)
+line.names <- c("C10", "C19", "M17", "M20")
+colnames(raw.dim) <- line.names
+rownames(raw.dim) <- c("Genes", "Droplets")
+
+raw.dim %>%
+  kbl(caption = "Table 1. Raw matrix dimensions for each cell line") %>%
+  kable_material(c("striped", "hover"))
+```
+
+## 1.2 Empty genes and droplets
+
+The next step is to filter low-quality droplets.
+
+To achieve this, the first thing is to remove all droplets with zero detected RNA:
+
+```{r remove_0_counts}
+# Remove droplets with 0 counts
+empty.drops <- NULL
+
+line.list <- lapply(line.list, function(line.matrix){
+  empty_droplets <- colSums(line.matrix) == 0
+  empty.drops <<- c(empty.drops, length(which(empty_droplets)))
+  line.matrix[,!empty_droplets]
+})
+
+# Number of droplets with 0 counts removed
+# C10: 5971929
+# C19: 5899209
+# M17: 6139647
+# M20: 5969238
+
+# Remove genes with 0 counts
+empty.gene.cnt <- NULL
+
+line.list <- lapply(line.list, function(line.matrix){
+  empty_genes <- rowSums(line.matrix) == 0
+  empty.gene.cnt <<- c(empty.gene.cnt, length(which(empty_genes)))
+  line.matrix[!empty_genes,]
+})
+
+zero_cnts_rm_dim <- lapply(line.list, dim)
+# [[1]]
+# [1]  32838 822951
+# 
+# [[2]]
+# [1]  32838 895671
+# 
+# [[3]]
+# [1]  32838 655233
+# 
+# [[4]]
+# [1]  32838 825642
+
+removed.genes.droplets <- rbind(empty.gene.cnt, empty.drops)
+rownames(removed.genes.droplets) <- c("Empty genes", "Empty droplets")
+colnames(removed.genes.droplets) <- line.names
+
+removed.genes.droplets %>%
+  kbl(caption = "Table 2. Empty genes and droplets to be removed") %>%
+  kable_material(c("striped", "hover"))
+```
+
+***
+
+## 1.3 Threshold filtering {.tabset}
+
+For single-nuclei analysis, it is common practice to filter droplets based on the percentage of genes expressed. Based on the violin plots shown below, I am going to go with a consistent threshold of 5%. This means that droplets with less than 5% of genes expressed will be removed. In addition, I will filter droplets with more than 5% of reads mapped to mitochondrial genes.
+
+```{r thresholds}
+lines.seu <- mapply(function(line.matrix, line.path) {
+  CreateSeuratObject(counts=line.matrix, 
+                     project=substr(line.path,nchar(line.path)-2, nchar(line.path)))
+  },
+  line.matrix = line.list,
+  line.path = cell.lines)
+
+lines.seu <- lapply(lines.seu, function(seu){
+  seu[["percent.mt"]] <- PercentageFeatureSet(seu, pattern = "^MT-")
+  seu[["percent.features"]] <- seu[["nFeature_RNA"]] / nrow(seu) * 100
+  return(seu)
+})
+
+```
+
+### C10
+
+```{r c10_vln}
+print(VlnPlot(lines.seu[[1]], features = c("percent.features", "percent.mt"), ncol = 2))
+```
+
+### C19
+
+```{r c19_vln}
+print(VlnPlot(lines.seu[[2]], features = c("percent.features", "percent.mt"), ncol = 2))
+```
+
+### M17
+
+```{r m17_vln}
+print(VlnPlot(lines.seu[[3]], features = c("percent.features", "percent.mt"), ncol = 2))
+```
+
+### M20
+
+```{r m20_vln}
+print(VlnPlot(lines.seu[[4]], features = c("percent.features", "percent.mt"), ncol = 2))
+```
+
+### Filter summary
+
+```{r remove_thresholded}
+# Filter droplets percent.mt < 5 and percent.features > 5
+
+lines.seu.red <- lapply(lines.seu, function(seu){
+  subset(seu, subset = percent.mt < 5 & percent.features > 5) 
+})
+
+threshold.rm.cnts <- sapply(lines.seu, ncol) - sapply(lines.seu.red, ncol)
+reduced.dims <- lapply(lines.seu.red, dim)
+reduced.dims <- do.call(cbind, reduced.dims)
+
+threshold.tbl.summary <- rbind(threshold.rm.cnts, reduced.dims)
+colnames(threshold.tbl.summary) <- line.names
+rownames(threshold.tbl.summary) <- c("Droplets removed", "Genes", "Droplets")
+
+threshold.tbl.summary %>%
+  kbl(caption = "Table 3. Summary of droplets removed from thresholding and thresholded matrix dimensions") %>%
+  kable_material(c("striped", "hover")) %>%
+  pack_rows("Thresholded matrix dimensions", 2,3)
+```
+
+
+
+## 1.4 Seurat preprocessing
+
+Before continuing, I'm going to run some standard pre-processing using `Seurat`:
+
+* Log-normalisation
+* Find the most variable genes
+* Scale data
+* Dimensional reduction (PCA and UMAP)
+
+```{r seurat_preprocessing}
+#Seurat preprocess
+lines.seu.red <- lapply(lines.seu.red, function(seu){
+  seu <- NormalizeData(seu)
+  seu <- FindVariableFeatures(seu)
+  seu <- ScaleData(seu)
+  seu <- RunPCA(seu)
+  seu <- RunUMAP(seu, dims = 1:20, min.dist=0.08, n.neighbors=45, reduction="pca",
+                 n.components = 2L)
+  return(seu)
+})
+```
+
+## 1.5 Remove doublets {.tabset}
+
+Doublets are droplets that contain the RNA contents of two nuclei. I'm using the `DoubletFinder` package to identify these doublets. Identified doublets and singlets are labelled in the UMAPs below.
+
+```{r doubletfinder_run, include=FALSE}
+# include=FALSE because I can't find a way to suppress messages for DoubletFinder
+# An unrun chunk is shown below for the final RMarkdown.
+
+# Find doublets
+lines.seu.red <- lapply(lines.seu.red, function(seu){
+  nExp <- round(0.15*nrow(seu@meta.data))
+  seu <- doubletFinder_v3(seu, PCs = 1:10, pN = 0.25, pK = 0.01, nExp = nExp, reuse.pANN = FALSE, sct=FALSE)
+  return(seu)
+  })
+
+doublets.rm <- NULL
+
+plot_doublets <- function(seu){
+  doublet.name <- colnames(seu@meta.data)[grep("DF*", colnames(seu@meta.data))]
+  print(DimPlot(seu, reduction = "umap", label = F, pt.size = 0.25,
+                group.by = doublet.name) +
+          ggtitle(seu@project.name) +
+        ylab("UMAP 2") + xlab("UMAP 1") +
+          theme(text = element_text(size = 18),
+                axis.text = element_text(size = 18)))
+  length(which(seu[[doublet.name]]=="Doublet"))
+}
+```
+
+```{r doubletfinder_notRun, eval=FALSE}
+# Find doublets
+lines.seu.red <- lapply(lines.seu.red, function(seu){
+  nExp <- round(0.15*nrow(seu@meta.data))
+  seu <- doubletFinder_v3(seu, PCs = 1:10, pN = 0.25, pK = 0.01, nExp = nExp, reuse.pANN = FALSE, sct=FALSE)
+  return(seu)
+  })
+
+doublets.rm <- NULL
+
+plot_doublets <- function(seu){
+  doublet.name <- colnames(seu@meta.data)[grep("DF*", colnames(seu@meta.data))]
+  print(DimPlot(seu, reduction = "umap", label = F, pt.size = 0.25,
+                group.by = doublet.name) +
+          ggtitle(seu@project.name) +
+        ylab("UMAP 2") + xlab("UMAP 1") +
+          theme(text = element_text(size = 18),
+                axis.text = element_text(size = 18)))
+  length(which(seu[[doublet.name]]=="Doublet"))
+}
+```
+
+### C10
+
+```{r df_c10}
+doublets.rm <- c(doublets.rm, plot_doublets(lines.seu.red[[1]]))
+```
+
+### C19
+
+```{r df_c19}
+doublets.rm <- c(doublets.rm, plot_doublets(lines.seu.red[[2]]))
+```
+
+### M17
+
+```{r df_m17}
+doublets.rm <- c(doublets.rm, plot_doublets(lines.seu.red[[3]]))
+```
+
+### M20
+
+```{r df_m20}
+doublets.rm <- c(doublets.rm, plot_doublets(lines.seu.red[[4]]))
+```
+
+### Doublet filter summary    
+
+```{r keep_singlets}
+# Keep singlets
+lines.seu.red <- lapply(lines.seu.red, function(seu){
+  doublet.name <- colnames(seu@meta.data)[grep("DF*", colnames(seu@meta.data))]
+  seu[,seu[[doublet.name]] == "Singlet"]
+})
+```
+
+Overall the number of doublets removed are:
+
+* **C10: ** `r doublets.rm[1]` 
+* **C19: ** `r doublets.rm[2]` 
+* **M17: ** `r doublets.rm[3]` 
+* **M20: ** `r doublets.rm[4]` 
+
+
+## 1.6 Quality Assurance {.tabset}
+
+I'm plotting scatterplots for each cell line to check if the remaining nuclei are what we expect.
+
+Overall, we see a positive association between total RNA counts and genes expressed; and nuclei with higher percentages of mitochondrial genes end to have lower counts of RNA. This is expected.
+
+### C10
+
+```{r QA_c10}
+plot_qa <- function(seu){
+  plot1 <- FeatureScatter(seu, feature1 = "nCount_RNA", feature2 = "percent.mt")
+  plot2 <- FeatureScatter(seu, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+  print(plot1 + plot2)
+}
+
+plot_qa(lines.seu.red[[1]])
+```
+
+### C19
+
+```{r QA_c19}
+plot_qa(lines.seu.red[[2]])
+```
+
+### M17
+
+```{r QA_m17}
+plot_qa(lines.seu.red[[3]])
+```
+
+### M20
+
+```{r QA_m20}
+plot_qa(lines.seu.red[[4]])
+```
+
+# 2. Integration
+
+I'm using `Seurat`'s standard integration pipeline to integrate all four lines together. 
+
+```{r seurat_integration}
+# Integration
+features <- SelectIntegrationFeatures(object.list = lines.seu.red)
+line.anchors <- FindIntegrationAnchors(object.list = lines.seu.red, anchor.features = features)
+lines.combined <- IntegrateData(anchorset = line.anchors)
+```
+
+
+
+```{r, include=FALSE, eval=FALSE}
+run.vis.fun <- function(seu) {
+  seu <- ScaleData(seu, verbose = F, features = features)
+  seu <- RunPCA(seu, verbose = F, features = features)
+  seu <-
+    RunUMAP(
+      seu,
+      dims = 1:20,
+      min.dist = 0.08,
+      n.neighbors = 45,
+      reduction = "pca",
+      n.components = 2L,
+      verbose = F
+    )
+}
+
+raw.seu <-
+  CreateSeuratObject(cbind(
+    lines.seu.red[[1]]@assays$RNA@counts[features,],
+    lines.seu.red[[2]]@assays$RNA@counts[features,],
+    lines.seu.red[[3]]@assays$RNA@counts[features,],
+    lines.seu.red[[4]]@assays$RNA@counts[features,]
+  ))
+
+raw.seu <- run.vis.fun(raw.seu)
+raw.dist <- stats::dist(raw.seu@reductions$pca@cell.embeddings)
+
+# lines.combined <- run.vis.fun(lines.combined)
+# raw.dist <- stats::dist(lines.combined@reductions$pca@cell.embeddings)
+
+DefaultAssay(lines.combined) <- "integrated"
+
+lines.combined <- run.vis.fun(lines.combined)
+lines.dist <- stats::dist(lines.combined@reductions$pca@cell.embeddings)
+
+lines.int <- as.integer(factor(lines.combined@meta.data$orig.ident))
+
+raw.sil <- as.data.frame(silhouette(lines.int, raw.dist)[,])
+raw.sil$integrated <- "Raw"
+raw.sil$cell.line <- lines.combined@meta.data$orig.ident
+lines.sil <- as.data.frame(silhouette(lines.int, lines.dist)[,])
+lines.sil$integrated <- "Integrated"
+lines.sil$cell.line <- lines.combined@meta.data$orig.ident
+
+sil.df <- rbind(raw.sil, lines.sil)
+
+ggplot(sil.df, aes(x=cell.line,y=sil_width, fill=integrated)) + 
+  geom_boxplot() +
+  xlab(element_blank()) + ylab("Silhouette Width") +
+  theme_classic()
+
+lines.kbet <- kBET(df = t(as.data.frame(lines.combined@assays$integrated@scale.data)), 
+                   batch = lines.combined@meta.data$orig.ident,
+                   k0 = 0.1 * ncol(lines.combined))
+
+```
+
+
+# 3. Visualisation
+
+## Clustering {.tabset}
+
+### Clustree
+
+```{r clustree, fig.align='left'}
+run.vis.fun <- function(seu) {
+  seu <- ScaleData(seu, verbose = F, features = features)
+  seu <- RunPCA(seu, verbose = F, features = features)
+  seu <-
+    RunUMAP(
+      seu,
+      dims = 1:20,
+      min.dist = 0.08,
+      n.neighbors = 45,
+      reduction = "pca",
+      n.components = 2L,
+      verbose = F
+    )
+  seu <- FindNeighbors(seu, dims=1:20, verbose=F)
+  seu <- FindClusters(seu, resolution=seq(0.1,0.8,0.1), verbose=F)
+}
+DefaultAssay(lines.combined) <- "integrated"
+
+lines.combined <- run.vis.fun(lines.combined)
+
+optimal_res <- NULL
+
+run_clustree <- function(seu){
+  print(clustree(seu, prefix="integrated_snn_res."))
+  
+  clustree.stability <- clustree(seu, return="graph") %>%
+    activate(nodes) %>%
+    as.data.frame() %>%
+    group_by(integrated_snn_res.) %>%
+    summarise(average_stability = mean(sc3_stability))
+  
+  optimal_res <<- clustree.stability$integrated_snn_res.[clustree.stability$average_stability==max(clustree.stability$average_stability)][1]
+    
+  return(clustree.stability)
+}
+
+clustree.out <- run_clustree(lines.combined)
+```
+
+### Optimal resolution
+
+The optimal resolution is `r as.character(optimal_res)`.
+
+```{r optimal}
+colnames(clustree.out) <- c("Resolution", "Average_stability")
+clustree.out %>%
+    kbl(caption = "Clustering stability") %>% kable_paper(full_width=F) %>%
+    column_spec(2, color = "white",
+                background = spec_color(clustree.out$Average_stability, end = 0.7))
+```
+
+## UMAP {.tabset}
+
+These plots illustrate the structure of nuclei expression in two dimensional space. The dimensional reduction method is UMAP. 
+
+### Integrated UMAP 
+
+```{r umap_lines, fig.height=5}
+#DimPlot(lines.combined, reduction="pca", group.by = "orig.ident")
+
+(line.umap <- DimPlot(
+  lines.combined,
+  reduction = "umap",
+  label = F,
+  label.size = 6,
+  pt.size = 0.25,
+  group.by = "orig.ident"
+) +
+  ggtitle(element_blank()) +
+  ylab("UMAP 2") + xlab("UMAP 1") +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 18)))
+```
+
+
+### Automatic annotation
+
+```{r automatic_demicheli, fig.height=2.75, fig.width=7.2835}
+lines.combined <-
+  AddMetaData(lines.combined,
+              sapply(lines.combined$orig.ident, function(x) {
+                ifelse(substr(x, 1, 1) == "C", "Control", "MND")
+              }),
+              "case_control")
+
+demicheli.seu <- LoadH5Seurat("data/demicheli_seurat.h5Seurat")
+
+demicheli.anchors <-
+  FindTransferAnchors(
+    reference = demicheli.seu,
+    query = lines.combined,
+    dims = 1:35,
+    reference.reduction = "pca"
+  )
+
+predictions <-
+  TransferData(
+    anchorset = demicheli.anchors,
+    refdata = demicheli.seu$cell_annotation,
+    dims = 1:35
+  )
+
+lines.combined <- AddMetaData(lines.combined, metadata = predictions)
+lines.combined$predicted.id <- factor(sapply(lines.combined$predicted.id, function(x){
+  ifelse(grepl("muscle", x), "Mature skeletal muscle", "Fibroblasts")}), levels=c("Mature skeletal muscle", "Fibroblasts"))
+combined.muscle <- subset(lines.combined, cells=grep("Mature skeletal muscle", lines.combined$predicted.id))
+integrated_case_control <- DimPlot(lines.combined, reduction = "umap", group.by="case_control", cols = DiscretePalette(2, palette = "alphabet"), pt.size = 0.01) + 
+    xlab("UMAP 1") + ylab("UMAP 2") + ggtitle(element_blank()) + 
+  theme(legend.position="bottom", legend.direction = "vertical", 
+        plot.tag=element_text(face="plain", size=18)) +
+    labs(tag="A")
+integrated_pred_umap <- DimPlot(lines.combined, reduction = "umap", group.by="predicted.id", pt.size = 0.01) + 
+    xlab("UMAP 1") + ylab("UMAP 2") + ggtitle(element_blank()) + 
+  theme(legend.position="bottom", legend.direction = "vertical", 
+        plot.tag=element_text(face="plain", size=18)) +
+    labs(tag="B")
+
+(fig9.ab <- integrated_case_control + integrated_pred_umap + plot_layout(guides = "collect"))
+```
+
+# 4. Differential Expression
+
+```{r marker_genes}
+# DE
+DefaultAssay(combined.muscle) <- "RNA"
+Idents(combined.muscle) <- "case_control"
+
+case.control.de <-
+  FindMarkers(
+    combined.muscle,
+    ident.1 = "MND",
+    ident.2 = "Control",
+    test.use = "MAST",
+    min.pct = 0.01,
+    logfc.threshold = 0.05,
+    verbose = F
+  )
+
+ah <- AnnotationHub()
+ahDb <- query(ah, pattern = c("Ensembl 103 EnsDb for Homo sapiens"))
+ahEdb <- ahDb[[1]]
+
+get_description <- function(up.table) {
+  all.genes <- unique(unlist(up.table$gene))
+  genes.split <-
+    split(all.genes, ceiling(seq_along(all.genes) / 50))
+  bm.tbl <- NULL
+  
+  for (i in 1:length(genes.split)) {
+    bm.out <-
+      biomaRt::select(
+        ahEdb,
+        keys = genes.split[[i]],
+        columns = c("SYMBOL", "DESCRIPTION"),
+        keytype = "SYMBOL"
+      )
+    bm.tbl <- rbind(bm.tbl, bm.out)
+  }
+  
+  up.table[["description"]] <-
+    bm.tbl$DESCRIPTION[match(up.table$gene, bm.tbl$SYMBOL)]
+  
+  return(up.table)
+}
+```
+
+Our analysis reveals that there are **no overt differences** in expression between MND and control muscle nuclei, including the Agrin-MuSK signalling pathway.
+
+
+# 5. Figures
+
+Figures shown here are outputs straight from the code below. For our paper, we further modified the formatting and text in PowerPoint for aesthetic purposes.
+
+## Figure 9
+
+```{r PlotDotPlots, warning=FALSE, message=FALSE, fig.height=7.3, fig.width=7.2835}
+agrin.musk.transcripts <- c("MUSK", "CHRNA1", "DES", "LRP4", "DOK7", "CAV3", "RAPSN")
+
+Idents(lines.combined) <- "orig.ident"
+
+integrated.dotplot <- DotPlot(
+  lines.combined,
+  assay = "RNA",
+  dot.min = 0.01,
+  features = agrin.musk.transcripts,
+  split.by = "predicted.id",
+  cols = c("blue", "blue")
+) +
+coord_flip() +
+xlab(element_blank()) + ylab("Predicted Cell Type") +
+labs(tag = "C") +
+theme(
+  axis.text.x = element_text(
+    angle = 90,
+    hjust = 1,
+    vjust=0.35,
+    colour = c("#F8766D", "#00BFC4")
+  ),
+  axis.text.y = element_text(face = "italic"),
+  plot.title = element_text(face = "plain", hjust = 0),
+  legend.position = "right",
+  plot.tag = element_text(face="plain", size=18)
+)
+
+integrated_case_control <- integrated_case_control + labs(tag = "A") + theme(plot.tag = element_text(face="plain", size=18))
+integrated_pred_umap <- integrated_pred_umap + labs(tag="B") + theme(plot.tag = element_text(face="plain", size=18))
+fig9.ab <- integrated_case_control + integrated_pred_umap + plot_layout(guides = "collect")
+fig9.abc <- fig9.ab / integrated.dotplot
+
+# fig_nine_dml <- rvg::dml(ggobj = fig9.abc)
+# officer::read_pptx() %>%
+#   officer::add_slide() %>%
+#   officer::ph_with(fig_nine_dml, ph_location(width=7.2835, height = 5)) %>%
+#   base::print(
+#     target =
+#       "C:/Users/s4353395/Documents/snrnaseq_mnd/scripts/fig9.pptx"
+#   )
+
+fig9.abc
+```
+**Figure  9. Transcriptomic analysis of muscle cell culture nuclei derived from human muscle stem cells identifies fibroblastic and muscle cell types with no apparent bias across MND status.**     
+**(A)** Whole-transcriptome expression profile patterns for individual nuclei derived from control (Con-13, Con-16) and MND donor (MND-16, MND-9) lines. Distinct expression profile patterns have been reduced to two-dimensions in this Uniform Manifold Approximation and Projection (UMAP) plot. Each point shows results for a single nucleus. MND and non-MND nuclei (pink and blue) are co-clustered in the UMAP, indicating similar patterns of whole-transcriptome expression between MND and controls. **(B)** Nuclei annotated for cell-type, identifying two distinct populations: mature skeletal muscle and fibroblasts. **(C)** Transcript dot plot comparing levels of expression for some key components of the n-agrin-MuSK signaling cascade in two MND samples versus two non-MND samples (see supplementary Figure S5 for full data set). All four samples show transcripts consistent with their expression in muscle cells. Expression of n-agrin-MuSK signaling transcripts appeared comparable between MND and control. Further, all samples do have nuclei that express transcripts associated with maturing muscle skeletal muscle.
+
+## Supplementary Figure 5
+
+```{r suppl_dotplot, warning=FALSE, message=FALSE, fig.height=8, fig.width=11}
+dotplot.symbols <- c(
+  "TTN",
+  "RYR1",
+  "MYOG",
+  "HDAC4",
+  "MEF2A",
+  "ACTA1",
+  "TNNT3",
+  "TNNI1",
+  "DMD",
+  "MYH3",
+  "DES",
+  "MUSK",
+  "DOK7",
+  "CAV3",
+  "LRP4",
+  "RAPSN",
+  "CHRNA1",
+  "NCAM1",
+  "RUNX1",
+  "APOE",
+  "POSTN",
+  "FBN1",
+  "MFAP5",
+  "FN1",
+  "COL4A1",
+  "COL3A1",
+  "COL1A1"
+)
+
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+        sep="", collapse=" ")
+}
+
+dotplot.proteins <- get_description(data.frame(gene = dotplot.symbols))
+dotplot.proteins$protein <- sapply(dotplot.proteins$description, function(x){
+  x <- strsplit(x, " [", fixed=T)[[1]][[1]]
+  x <- strsplit(x, ",")[[1]][[1]]
+  simpleCap(x)
+})
+dotplot.proteins$val <- 1
+dotplot.proteins$protein <- factor(dotplot.proteins$protein, levels=dotplot.proteins$protein)
+
+protein.plot <- ggplot(data = dotplot.proteins, aes(x=protein, y=val)) +
+  geom_bar(stat="identity", color = "transparent", fill="transparent") + 
+  labs(x=element_blank(), y=element_blank()) +
+  theme_classic() + 
+  theme(
+    plot.background = element_rect(fill = "transparent", color = "transparent"),
+    axis.text.y = element_text(size = 12, color = c(
+      rep("#F8766D", 19),
+      rep("#00BFC4", 8)
+    )),
+    axis.text.x = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none"
+  ) +
+  coord_flip()
+ 
+suppl.dotplot <- DotPlot(
+  lines.combined,
+  assay = "RNA",
+  dot.min = 0.01,
+  features = dotplot.symbols,
+  split.by = "predicted.id",
+  cols = c("blue", "blue")
+) +
+coord_flip() +
+xlab(element_blank()) + ylab("Predicted Cell Type") +
+theme(
+  axis.text.x = element_text(
+    angle = 90,
+    hjust = 1,
+    vjust=0.35,
+    colour = c("#F8766D", "#00BFC4")
+  ),
+  axis.text.y = element_text(face = "italic",
+                             colour = c(
+      rep("#F8766D", 19),
+      rep("#00BFC4", 8)
+    )),
+  plot.title = element_text(face = "plain", hjust = 0),
+  legend.position = "right"
+)
+
+suppl.fig <- protein.plot + suppl.dotplot + plot_layout(widths=c(0.1,1))
+# suppl_dml <- rvg::dml(ggobj = suppl.fig)
+# officer::read_pptx() %>%
+#   officer::add_slide() %>%
+#   officer::ph_with(suppl_dml, ph_location(width=11, height = 8)) %>%
+#   base::print(
+#     target =
+#       "C:/Users/s4353395/Documents/snrnaseq_mnd/scripts/S5_1.pptx"
+#   )
+
+suppl.fig
+```
+
+**Supplementary Figure S5. Dot-plot of selected marker genes from nuclei isolated from non-MND and MND muscle cultures.**    
+Each nuclei isolated from Con-13, Con-16, MND-16, and MND-9 cultures have been automatically catalogued into 2 cell types, based on the single-cell transcriptomic atlas of human skeletal muscle by De Micheli et al, which were manually annotated based on their relative expression of key marker genes (41); i) ‘Fibroblasts’ expressing higher levels of COL1A1; ii) ‘Mature skeletal muscle’ cells (i.e. multinucleated myotubes) whose nuclei consistently displayed a collection of muscle specific genes such as DES, TTN, DMD, and MYH3, as well as genes whose proteins drive the clustering of acetylcholine receptors (AChRs), such as MuSK, LRP4, Dok7, Rapsyn and including AChR subunits (e.g. CHRNA1), and finally known muscle genes RUNXI1 and NCAM1 that are expressed in muscle devoid of motor nerve innervation. 
+
+# 6. Session Information
+
+`r report(sessionInfo())`
