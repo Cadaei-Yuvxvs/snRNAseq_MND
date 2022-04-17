@@ -10,6 +10,10 @@ editor_options:
 
 # Single Nuclei RNA Sequencing for MND Muscle
 
-Welcome to the single nuclei analysis website for [*Impaired signaling for neuromuscular synaptic maintenance is a feature of Motor Neuron Disease*](https://actaneurocomms.biomedcentral.com/articles?query=Impaired+signaling+for+neuromuscular+synaptic+maintenance+is+a+feature+of+Motor+Neuron+Disease&volume=&searchType=&tab=keyword), published in *Acta Neuropathologica Communications*.
+Welcome to the single nuclei analysis website for [*Impaired signaling for neuromuscular synaptic maintenance is a feature of Motor Neuron Disease*](https://actaneurocomms.biomedcentral.com/articles?query=Impaired+signaling+for+neuromuscular+synaptic+maintenance+is+a+feature+of+Motor+Neuron+Disease&volume=&searchType=&tab=keyword) by Ding *et al.*, published in *Acta Neuropathologica Communications*.
 
-For the raw single nuclei dataset, please visit our UQ eSpace repository: <https://doi.org/10.48610/0106c8e>.
+## Raw Code and Data
+
+You can find the raw *R* code in the *analysis* folder of our [GitHub repository](https://github.com/Cadaei-Yuvxvs/snRNAseq_muscle_MND).
+
+For the raw single nuclei dataset, please visit our [UQ eSpace repository](https://doi.org/10.48610/0106c8e).
